@@ -6,7 +6,7 @@
 /*   By: hyoyoon <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/08 15:52:21 by hyoyoon           #+#    #+#             */
-/*   Updated: 2023/10/08 15:54:34 by hyoyoon          ###   ########.fr       */
+/*   Updated: 2024/03/28 20:27:11 by hyoyoon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,13 @@
 
 int	ft_lstsize(t_list *lst)
 {
-	int	len;
+	int	size;
 
-	len = 0;
+	size = 0;
 	while (lst != 0)
 	{
-		len++;
+		size++;
 		lst = lst->next;
 	}
-	return (len);
+	return (size);
 }
