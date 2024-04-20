@@ -6,7 +6,7 @@
 /*   By: hyoyoon <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/20 12:30:52 by hyoyoon           #+#    #+#             */
-/*   Updated: 2024/04/20 12:42:21 by hyoyoon          ###   ########.fr       */
+/*   Updated: 2024/04/20 13:11:55 by hyoyoon          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,7 +94,7 @@ char	*get_next_line(int fd)
 {
 	char		*ans;
 	char		*temp;
-	char		*buffer[OPEN_MAX];
+	char		*buffer;
 	static char	*save[OPEN_MAX];
 
 	if (fd < 0)
@@ -105,11 +105,11 @@ char	*get_next_line(int fd)
 		if (save[fd] == 0)
 			return (0);
 	}
-	buffer[fd] = (char *) malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (buffer[fd] == 0)
+	buffer = (char *) malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (buffer == 0)
 		return (0);
-	save[fd] = read_line(fd, buffer[fd], save[fd]);
-	free(buffer[fd]);
+	save[fd] = read_line(fd, buffer, save[fd]);
+	free(buffer);
 	if (save[fd] == 0)
 		return (0);
 	temp = get_new_save(save[fd]);
