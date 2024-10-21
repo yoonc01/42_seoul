@@ -1,0 +1,194 @@
+export $
+-> 밸류값 없이 키 값만 들어오는 경우와 동일하게 처리
+키값만 들어오는 경우에는 환경변수 리스트에 key=''으로 저장되게 처리
+
+env 명령어 실행시에는 env_list돌면서 value값이 있는 경우만 출력
+export 명령어는 env_list에 있는 모든 key와 value값출력
+
+알파벳 아닌경우 숫자 아닌경우 언더바 아닌경우
+!((*env >= 0 && *env <= 9)||(*env >=a ** *env <= z)||
+(*env >= A && *env <= Z)||*env=='_')
+
+그냥 환경변수만 $()
+sfd"${}"sdf
+
+asdf$asdfjklasdf
+
+sdjklasdfjklasdjfklasjdklf
+
+sdjklasdfsdjk 
+
+asd$sjddkf
+
+환경변수 3개
+asd$a$b$c
+이 스트링의 길이를 어떻게 알고 malloc 할 것인가
+1. strjoin으로 뒤에 붙여주기
+
+input이 어떤 경우에는 복사 멈춤
+-> ""(큰 따옴표 나오면), '', $
+
+09/22
+pipecnt만큼 자식 fork
+자식들 pipe로 연결해주기
+자식들이 자기가 실행해야 하는 커맨드 출력
+자식들간에 파이프가 잘 연결 되었는지 확인
+-> 파이프를 통해 전달받은 숫자에 1 더해서 출력하기
+
+
+pipex와 다르게 처음과 끝에만 redirect가 들어오는게 아니라 
+파이픞 사이 사이에 들어올 수도 있다
+->fork하고 나서 자식 프로세스에서 redirection 설정 해줘야 한다
+connect pipe with older child 
+-> file redirection (file open, error handle, connect to stdin)
+(파이프와 파일 리다이렉션이 모드 들어오면 ex. ls| < test cat>test2 이면 
+cat의 input은 ls의 결과가 아닌 test의 내용
+리다이렉션이 파이프보다 우선시)
+-> stdin stdout 정해졌으므로 커맨드 실행
+
+부모는 항상 이전 자식 프로세스와 연결된 파이프의 pipefd[0]를 가지고 있다가
+새로운 자식을 만들 때 넘겨줘야 한다
+
+처음 자식일 때 -> stdin 어떻게 할 지
+마지막 자식일 때 -> stdout 어떻게 할 지
+
+파이프 생성 -> 포크		
+부모-> tmp_fd에 pipefd[1] 저장									-> 
+자식1-> fd1을 stdin으로 redirection	-> stdout을 pfd[1]로 바꾼다		->
+파이프 생성 ->포크
+부모 ->  tmp_fd에 pipefd[1] 저장
+자식2 -> stdin을 tmp_fd로 바꾼다 -> stdout을 pfd[1]로 바꾼다
+
+미니쉘에 어떻게 적용
+
+
+
+파이프 생성 -> 포크
+부모 -> tmp_fd 에 pipefd[1] 저장
+자식 -> 자신이 실행해야 되는 커맨드 가져오기, 환경변수 이차원 배열로 바꾸기, 
+		파이프 리다이렉션 적용하기 (stdin을 tmp_fd로 std_out을 pipefd[0]로), 파일 리다이렉션 적용하기
+	 -> 명령어 실행하기
+
+파일 리다이렉션 적용 시 맨마지막의 리다이렉션만 적용하면된다
+-> 하지만 open은 해줘야 한다
+파일 없이 리다이렉션 시에는 tokenize에서 오류 출력해줘야 함
+
+파일 open 에러 핸들링 -> 리다이렉션 하면서 파일 열다가 오류발생(없는 파일) 시 에러 메시지 출력하고 exit 하기
+
+heredoc
+
+V 마지막 자식은 파리프 만들기만 하고 사용하지 않음
+
+char *get_env(char *key) -> key값 넣으면 value반환 해주는 함수
+
+redirect 재건축 예정 -> 모든 리다이렉션, pipe, hererdoc 처리해주고 자식 프로세스 만들어줘야 함 (이렇게 안하면 heredoc입력 받는 와중에 output redirect file 생성됨)
+pipefd[2] 를 원소로 가지는 2차원 int 배열로 pipefd 관리
+최종적으로 리다이렉션이 완료되고 자식 프로세스 만들기 직전의 자식 프로세스들의 in out이 순서대로 있는 int 배열 만들기
+
+ "       " 입력 시 segfault문제
+ ->add history는 해줘야 함
+"          << eof" heredoc입력은 받아줘야 한다
+-> check_cmd_type하면서 문제 발생
+	null cmd type 추가하기 -> execute_builtin 안에서 redirection 하고 나가기
+	check_cmd_type하기 전에 redirection 완료하기
+	parsing redirection 할 때 parsing in parsing out으로 in과 out 따로 만들기
+
+> out1 <<eof << eee  > out2  <test
+-> in redirection 처리 heredoc 입력받음
+-> out redirection 처리 
+-> cmd_check_type null으로 명령어 실행하지 않고 종료
+
+solo builtin은 어떻게 redirection할지 stdout stdin을 따로 dup해놨다가 solo builtin끝나면 복구해주기
+
+
+ls | >out1 << eof << eee cat >out2 <test| cat
+2번째 자식의 리다이렉션 -> 
+redirection_in -> << eof <eee <test 
+redirection_out -> >out1 >out2 
+부모에서 자식의 in 과 out 정해줘야 함
+
+child_in = prev_pipe -> child_in = heredoc_eof -> child_in = heredoc_eee -> child_in = test_fd
+heredoc프롬프트는 아직 output이 redirection되지 않았으므로 stdout 에 출력해도 넘어가지 않는다
+
+child_out = pipefd[1] -> child_out = out1_fd -> child_out = out2_fd
+pipefd의 쓰기엔드가 열려있고 읽기 엔드가 닫힌 경우에 쓰려고하면 SIGPIPE ERROR가 발생한다
+파이프는 순차적으로 생성되므로 읽기엔드 먼저닫히는 경우는 없음
+
+2번째 자식에서 리다이렉션 처리중에 input fd가 prev_pipe에서 바뀌는 경우 
+
+0번째 블록일 경우-> 
+마지막 블록일 경우->
+
+
+
+"                    " 입력 시 segfault
+-> 헤더 파일 매크로 수정, check_cmd_type, execute_command수정
+-> exitcode 0으로 설정
+
+프롬프트 섞여서 나오는 문제
+명령어 입력중에 ctrl \ 입력
+
+
+1. 커맨드를 입력 받을 때마다 터미널 세팅과 시그널 초기화 해야된다
+-> 터미널은 echoctl off 해서 ctrl c ctrl \ 입력받아도 제어문자 안나오도록 한다
+-> 시그널은 ctrl c 입력 시 개행 출력하고 프롬프트 출력하도록 한다 heredoc 예외처리하기
+-> SIGQUIT은 무시한다
+2. 
+	1 - no fork 일 경우 -> heredoc으로 처리하면됨
+	2 - fork 일 경우 -> fork 전에 시그널 핸들러로 SIGQUIT들어와도 아무것도 안하게 설정 execve 하면 시그널 핸들러 초기화 된다
+	3 - 자식 
+	4 - 부모 echoctl on 해서 ctrl c ctrl \ 입력 들어오면 제어문자 출력되도록 한다
+		signal 세팅해서 SIGINT들어오면 개행 출력 되도록 (제어문자 + 개행)
+		waitchild 함수에서 마지막 자식의 pid들고 간 다음에
+		종료 상태를 waitpid(-1, &status, 0)을 이용해서 받기
+		마지막 커맨드 종료상태를 보고 시그널종료인지 정상 종료인지 확인하기
+
+
+echo 개행 안들어가는 문제
+"         "입력시 릭나는 문제
+export a+=b할 경우 릭나는 문제
+heredoc 입력 받을 때 뒤에 지워짐
+<<ss echo segfault
+echo ssss 하면 개행 출력되는 문제
+
+heredoc은 따로 빼 놨다가 fork하고 나서 하기
+
+heredoc 입력 받는중에 sigint들어오면 뒤에 파이프가 있더라도 명령어를 동료해야 한다
+-> 자식을 포크해서 거기서 heredoc 실행하기 실행하다가 sigint들어오면 자식 종료하고 부모에게 반환하기 
+-> 부모는 히어독입력중에 sigint 들어오면 프롬프트 정렬해줘야 함
+기존에 실행했던 자식들이 종료될 때까지는 wait하기
+
+없는 파일 열라고 할 때 문제 안생기는지 확인하기
+
+마지막 자식 종료 코드 설정
+
+하위 7비트로 자식이 정상 종료되었는지 시그널로 종료되었는지 확인
+정상 종료되었다면 하위 7비트가 0이고 상위 8비트를 추출해서 exitcode에 저장
+하위 7비트가 0이나0177이 아니면 시그널에 의한 종료
+종료를 유발한 시그널 번호 exit_code에 저장
+sigquit받았을 경우 "Quit: 3" stderr 에 출력하고 종료
+
+파이프로 실행중에 중간에 실패하는 명령어가 생겨도 뒤에는 계속 실행되야 한다
+-> 리다이렉션 실패 시 명령어 멈춰버리는 문제
+
+65번 파일 리다이렉션 검사 -> 잘되는대? 에러메시지 한번만 나옴, 에러코드 잘 나옴
+
+73번 파이프에서 앞 커맨드가 실패하면 뒤 커맨드 실행 제대로 안됨
+-> echo 명령어 실행 시 파이프 인덱스가 안 넘어가고 있었음 😢
+-> 고치니까 정답 20개 증가 😄
+
+77번 cat <missing | cat : 
+-> 첫번째 명령어에 없는 파일이 리다이렉션으로 들어올 경우 리다이렉션 실패 처리하면서 파이프를 닫아 줘야 함
+-> 리다이렉션 실패 시 파이프 쓰기단은 닫고 읽기 단은 prev_pipe로
+
+
+108번, 130번, 105번 리다이렉션 할 때 들어온 순서대로 받다가 잘못된 리다이렉션 있으면 거기서 멈추기
+
+65번  83번 nofork리다이렉션도 fork 리다이렉션 처럼 순서대로 실행하기 echo <ex < noex <ex 입력 시 미니쉘 꺼저버림
+-> 기존 fork 리다이렉션 활용해서 해결
+
+55번 에러메시지 두번 출력
+-> 인자 큰따옴표 분리되서 들어가기 때문에 인자 두개로 인식함 앞에는 검색 대상 뒤에는 파일
+
+44번 exit 출력값
+
