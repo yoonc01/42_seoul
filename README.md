@@ -11,7 +11,7 @@
 - **[Ft_printf](./Ft_printf)**: printf 함수 재구현 프로젝트
 - **[GNL (Get Next Line)](./GNL)**: 파일 또는 표준 입력에서 한 줄씩 읽는 함수 구현
 - **[Libft](./Libft)**: C 표준 라이브러리를 직접 구현하여 기본적인 함수들에 대한 이해를 증진
-- **[Minishell](./Minishell)**: 간단한 쉘 프로그램 구현
+- **[Minishell](./Minishell)**: 간단한 쉘 프로그램 구현 [프로젝트 진행 과정 중 PR](https://github.com/yoonc01/Re_minishell/pulls?q=is%3Apr+is%3Aclosed)
 - **[Minitalk](./Minitalk)**: 클라이언트-서버 통신 프로그램 구현
 - **[Net_Practice](./Net_Practice)**: 네트워크 기본 지식 및 설정 실습 [블로그 시리즈 참고](https://velog.io/@yoonc01/series/42-netpractice)
 - **[Philosophers](./Philosophers)**: 멀티스레드 동기화 문제를 해결하며 스레드 프로그래밍 학습
